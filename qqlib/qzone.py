@@ -9,6 +9,7 @@ class QZone(QQ):
     url_success = 'http://qzs.qq.com/qzone/v5/loginsucc.html?para=izone'
     url_feed = 'http://taotao.qzone.qq.com/cgi-bin/emotion_cgi_publish_v6'
     url_home = 'https://user.qzone.qq.com/'
+    url_like = 'https://h5.qzone.qq.com/proxy/domain/w.qzone.qq.com/cgi-bin/likes/internal_dolike_app'
 
     def g_tk(self):
         h = 5381
@@ -60,6 +61,26 @@ class QZone(QQ):
         res = self._feed(data)
         res.raise_for_status()
 
+    def _like(self, data):
+        return self.fetch(self.url_like, params={
+            'g_tk': self.g_tk(),
+            'qzonetoken': self.qzonetoken(),
+        }, data = {
+            'opuin': self.user,
+            'appid': "311",
+            'opr_type': "like",
+            'format': "purejson",
+            'unikey': data.get('unikey', ''),
+            'curkey': data.get('curkey', ''),
+            # 'unikey': "http://user.qzone.qq.com/1601742402/mood/42a6785f8ab2d858ad080800",
+            # 'curkey': "http://user.qzone.qq.com/1601742402/mood/42a6785f8ab2d858ad080800"
+        })
+
+    def like(self, data):
+        res = self._like(data)
+        res.raise_for_status()
+
+
 class MQZone(QZone):
     url_success = 'https://h5.qzone.qq.com/mqzone/index'
     url_feed = 'https://mobile.qzone.qq.com/mood/publish_mood'
@@ -83,3 +104,19 @@ class MQZone(QZone):
             'issyncweibo': 0,
             'format': 'json',
         })
+
+    def _like(self, data):
+        return self.fetch(self.url_like, params={
+            'g_tk': self.g_tk(),
+            'qzonetoken': self.qzonetoken(),
+        }, data = {
+            'opuin': self.user,
+            'appid': "311",
+            'opr_type': "like",
+            'format': "purejson",
+            'unikey': data.get('unikey', ''),
+            'curkey': data.get('curkey', ''),
+            # 'unikey': "http://user.qzone.qq.com/1601742402/mood/42a6785f8ab2d858ad080800",
+            # 'curkey': "http://user.qzone.qq.com/1601742402/mood/42a6785f8ab2d858ad080800"
+        })
+

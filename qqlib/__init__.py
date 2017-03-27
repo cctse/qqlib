@@ -6,6 +6,8 @@ Licensed to MIT
 import hashlib, re, binascii, base64
 import rsa, requests
 from . import tea
+import pickle
+import os
 
 __all__ = ['QQ', 'LogInError', 'NeedVerifyCode']
 
@@ -153,6 +155,16 @@ class QQ:
 
     url_login = 'http://ptlogin2.qq.com/login'
     def login(self, force=False):
+
+        if os.path.exists(str(self.user)+'.pkl'):
+            with open(str(self.user)+'.pkl', 'rb') as f:
+                self.session.cookies = pickle.load(f)
+            print('直接使用cookie登录')
+            for k,v in self.session.cookies.items():
+                print("----->", k, v)
+            return
+
+        # 使用密码登录
         login_sig = self.session.cookies['pt_login_sig']
         if force:
             self.verifier = None
@@ -191,6 +203,10 @@ class QQ:
         self.nick = r[5]
         self.fetch(r[2])
         self.verifier = None
+
+        with open(str(self.user)+'.pkl', 'wb') as f:
+            print("保存cookie到文件")
+            pickle.dump(self.session.cookies, f)
 
     def fromhex(self, s):
         # Python 3: bytes.fromhex
